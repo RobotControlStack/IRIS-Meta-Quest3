@@ -40412,7 +40412,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 6064859519696199174}
-        m_TargetAssemblyTypeName: Oculus.Interaction.Samples.ISDKSceneMenuManager,
+        m_TargetAssemblyTypeName: Oculus.Interaction.Samples.IRISSceneMenuManager,
           Assembly-CSharp
         m_MethodName: ToggleMenu
         m_Mode: 1

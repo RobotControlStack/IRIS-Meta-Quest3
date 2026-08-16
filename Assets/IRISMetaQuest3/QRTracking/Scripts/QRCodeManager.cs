@@ -20,51 +20,30 @@
 
 using Meta.XR.MRUtilityKit;
 using Meta.XR.Samples;
-
-using System;
 using System.Collections.Generic;
-
-using UnityEngine;
 using IRIS.Node;
+using UnityEngine;
 
 namespace IRIS.MetaQuest3.QRCodeDetection
 {
     [MetaCodeSample("MRUKSample-QRCodeDetection")]
     public class QRCodeManager : Singleton<QRCodeManager>
     {
-        //
-        // Static interface
-
         public const string ScenePermission = OVRPermissionsRequester.ScenePermission;
 
         public static bool IsSupported
             => OVRAnchor.TrackerConfiguration.QRCodeTrackingSupported;
 
-        private Dictionary<string, MRUKTrackable> _trackedQRCodes = new Dictionary<string, MRUKTrackable>();
-
-
-        [SerializeField]
-        QRCode _qrCodePrefab;
-
-        // [SerializeField]
-        // QRCodeSampleUI _uiInstance;
+        private readonly Dictionary<string, MRUKTrackable> _trackedQRCodes = new();
 
         [SerializeField]
-        MRUK _mrukInstance;
+        private QRCode _qrCodePrefab;
 
-        // non-serialized fields
-
-
-        static QRCodeManager s_instance;
-
-        void Start()
-        {
-        }
+        [SerializeField]
+        private MRUK _mrukInstance;
 
         void OnEnable()
         {
-            s_instance = this;
-
             if (!_mrukInstance)
             {
                 Debug.LogError($"{nameof(QRCodeManager)} requires an MRUK object in the scene!");
@@ -75,18 +54,20 @@ namespace IRIS.MetaQuest3.QRCodeDetection
             _mrukInstance.SceneSettings.TrackableRemoved.AddListener(OnTrackableRemoved);
         }
 
-        void Update()
+        void OnDisable()
         {
+            if (!_mrukInstance)
+            {
+                return;
+            }
+
+            _mrukInstance.SceneSettings.TrackableAdded.RemoveListener(OnTrackableAdded);
+            _mrukInstance.SceneSettings.TrackableRemoved.RemoveListener(OnTrackableRemoved);
+            _trackedQRCodes.Clear();
         }
-
-
-        void OnDestroy()
-            => s_instance = null;
 
         public void OnTrackableAdded(MRUKTrackable trackable)
         {
-            Debug.Log($" {nameof(OnTrackableAdded)} called.");
-
             if (trackable.TrackableType != OVRAnchor.TrackableType.QRCode)
             {
                 return;
@@ -97,13 +78,14 @@ namespace IRIS.MetaQuest3.QRCodeDetection
                 return;
             }
 
-            _trackedQRCodes[trackable.MarkerPayloadString] = trackable;
-            Debug.Log($"{nameof(OnTrackableAdded)}: QRCode tracked! Text: {trackable.MarkerPayloadString}");
+            string normalizedPayload = NormalizePayload(trackable.MarkerPayloadString);
+
+            _trackedQRCodes[normalizedPayload] = trackable;
+            Debug.Log($"{nameof(OnTrackableAdded)}: QR code tracked. Payload: {normalizedPayload}");
+
             QRCode qrCode = Instantiate(_qrCodePrefab, trackable.transform);
-            // QRCode qrCode = qrCode.GetComponent<QRCode>();
             qrCode.Initialize(trackable);
             qrCode.GetComponent<Bounded2DVisualizer>().Initialize(trackable);
-
         }
 
         public void OnTrackableRemoved(MRUKTrackable trackable)
@@ -112,33 +94,39 @@ namespace IRIS.MetaQuest3.QRCodeDetection
             {
                 return;
             }
-            _trackedQRCodes.Remove(trackable.MarkerPayloadString);
+
+            string normalizedPayload = NormalizePayload(trackable.MarkerPayloadString);
+
+            if (normalizedPayload != null)
+            {
+                _trackedQRCodes.Remove(normalizedPayload);
+            }
 
             Debug.Log($"{nameof(OnTrackableRemoved)}: {trackable.Anchor.Uuid.ToString("N").Remove(8)}[..]");
-
-
             Destroy(trackable.gameObject);
         }
 
         public bool TrackingEnabled
         {
-            get => s_instance && s_instance._mrukInstance && s_instance._mrukInstance.SceneSettings.TrackerConfiguration.QRCodeTrackingEnabled;
+            get => _mrukInstance && _mrukInstance.SceneSettings.TrackerConfiguration.QRCodeTrackingEnabled;
             set
             {
-                if (!s_instance || !s_instance._mrukInstance)
+                if (!_mrukInstance)
                 {
                     return;
                 }
-                var config = s_instance._mrukInstance.SceneSettings.TrackerConfiguration;
+
+                var config = _mrukInstance.SceneSettings.TrackerConfiguration;
                 config.QRCodeTrackingEnabled = value;
-                s_instance._mrukInstance.SceneSettings.TrackerConfiguration = config;
+                _mrukInstance.SceneSettings.TrackerConfiguration = config;
             }
         }
 
-        internal Dictionary<string, MRUKTrackable> GetTrackedQRCodes()
-        {
-            return _trackedQRCodes;
-        }
+        internal bool TryGetTrackedQRCode(string payload, out MRUKTrackable trackable)
+            => _trackedQRCodes.TryGetValue(NormalizePayload(payload), out trackable);
+
+        internal static string NormalizePayload(string payload)
+            => payload?.TrimEnd('\0', '\r', '\n');
 
         public static bool HasPermissions
 #if UNITY_EDITOR
@@ -146,6 +134,5 @@ namespace IRIS.MetaQuest3.QRCodeDetection
 #else
             => UnityEngine.Android.Permission.HasUserAuthorizedPermission(ScenePermission);
 #endif
-
     }
 }

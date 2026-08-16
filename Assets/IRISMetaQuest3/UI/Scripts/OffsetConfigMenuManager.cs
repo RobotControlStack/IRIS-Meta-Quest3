@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
+using IRIS.Node;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static MQ3QRAlignmentManager;
-using IRIS.Node;
 
 public class OffsetConfigMenuManager : MonoBehaviour
 {
-
     [Header("References")]
     [Tooltip("Reference to the MQ3QRAlignmentManager in the scene")]
     [SerializeField] private IRISOrigin irisOrigin;
@@ -25,8 +22,8 @@ public class OffsetConfigMenuManager : MonoBehaviour
     [SerializeField] private float posStepSize = 0.001f; // Defined in Meters (e.g. 0.001 = 1mm)
     [SerializeField] private float rotStepSize = 1f;    // Defined in Degrees
 
-    private SceneOffset offset;
-    private bool listenersRegistered = false;
+    private SceneOffset offset = new();
+    private bool listenersRegistered;
 
     void Start()
     {
@@ -74,10 +71,6 @@ public class OffsetConfigMenuManager : MonoBehaviour
         UpdateRotationText(rotZ.value, rotZText);
     }
 
-    // ---------------------------------------------------------
-    // 1. GENERIC HANDLERS (The core logic)
-    // ---------------------------------------------------------
-
     private void HandlePositionChange(float sliderValueMM, Action<float> setOffsetAction, TMP_Text textComponent)
     {
         // Convert Slider (mm) to Data (meters)
@@ -108,11 +101,6 @@ public class OffsetConfigMenuManager : MonoBehaviour
     private void UpdateRotationText(float deg, TMP_Text text) => text.text = deg.ToString("F0") + "°";
 
 
-    // ---------------------------------------------------------
-    // 2. EVENT LISTENERS (Linked to Sliders)
-    // ---------------------------------------------------------
-
-    // We use Lambdas to inject the specific field logic
     private void AddListeners()
     {
         if (listenersRegistered) return;
@@ -140,13 +128,6 @@ public class OffsetConfigMenuManager : MonoBehaviour
         listenersRegistered = false;
     }
 
-    // ---------------------------------------------------------
-    // 3. STEP FUNCTIONS (Triggered by Buttons)
-    // ---------------------------------------------------------
-
-    // We only update the slider. The slider listener (defined above) 
-    // handles the text updates, data updates, and network calls automatically.
-
     public void StepOffsetX(int step) => offsetX.value += step * (posStepSize * 1000f);
     public void StepOffsetY(int step) => offsetY.value += step * (posStepSize * 1000f);
     public void StepOffsetZ(int step) => offsetZ.value += step * (posStepSize * 1000f);
@@ -154,5 +135,4 @@ public class OffsetConfigMenuManager : MonoBehaviour
     public void StepRotX(int step) => rotX.value += step * rotStepSize;
     public void StepRotY(int step) => rotY.value += step * rotStepSize;
     public void StepRotZ(int step) => rotZ.value += step * rotStepSize;
-
 }

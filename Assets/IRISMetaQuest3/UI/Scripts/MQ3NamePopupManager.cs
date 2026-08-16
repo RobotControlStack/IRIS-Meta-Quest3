@@ -2,7 +2,6 @@ using IRIS.Node;
 using Oculus.Interaction.Samples;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 namespace IRIS.MetaQuest3.UI
@@ -14,9 +13,8 @@ namespace IRIS.MetaQuest3.UI
         [SerializeField] private TMP_InputField appNameInput;
         [SerializeField] private Transform headTransform;
         [SerializeField] private GameObject _spawnPoint;
-        [SerializeField] private ISDKSceneMenuManager isdkSceneMenuManager;
-
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        [SerializeField] private IRISSceneMenuManager isdkSceneMenuManager;
+        [SerializeField, Min(0f)] private float forwardOffset = 0.4f;
 
         void Start()
         {
@@ -28,7 +26,6 @@ namespace IRIS.MetaQuest3.UI
             }
         }
 
-        // Update is called once per frame
         void Update()
         {
             SetPose();
@@ -41,22 +38,24 @@ namespace IRIS.MetaQuest3.UI
             
             if (nameChangePopup != null)
             {
-                // Position the popup in front of the user
+                nameChangePopup.SetActive(true);
                 SetPose();
+
                 if (appNameInput != null)
                 {
                     appNameInput.text = currentName;
                 }
-                nameChangePopup.SetActive(true);
             }
             // OVRManager.TrackingAcquired -= () => OpenNameChangePopup();
         }
 
         private void SetPose()
         {
-            if (nameChangePopup.activeInHierarchy && headTransform is not null && nameChangePopup is not null && _spawnPoint is not null)
+            if (nameChangePopup != null && nameChangePopup.activeInHierarchy && headTransform != null && _spawnPoint != null)
             {
-                nameChangePopup.transform.position = _spawnPoint.transform.position;
+                nameChangePopup.transform.position =
+                    _spawnPoint.transform.position + headTransform.forward * forwardOffset;
+
                 // look at user head
                 Vector3 lookPos = headTransform.position - nameChangePopup.transform.position;
                 // lookPos.y = 0; // keep the menu upright

@@ -45,6 +45,7 @@ namespace IRIS.MetaQuest3.QRCodeDetection
         {
             if (trackable.MarkerPayloadString is { } str)
             {
+                str = QRCodeManager.NormalizePayload(str);
                 _text.text = $"\"{str}\"";
             }
             else if (trackable.MarkerPayloadBytes is { } bytes)

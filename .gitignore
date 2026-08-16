@@ -122,3 +122,6 @@ Assets/Scenes/UISet.unity
 Assets/Scenes/UISet.unity.meta
 Assets/Scenes/UISetPatterns.unity
 Assets/Scenes/UISetPatterns.unity.meta
+
+# NuGetForUnity restores supporting package files around the tracked runtime DLL.
+/Assets/Packages/System.Runtime.CompilerServices.Unsafe.6.0.0/*

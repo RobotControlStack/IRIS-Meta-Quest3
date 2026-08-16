@@ -11,14 +11,27 @@ Download the APK from the latest release onto your device and install it followi
 If you need to modify the unity code, you will have to build the APK from source. For this it is recommended to put your quest into developer mode. See [this guide](https://github.com/rail-berkeley/oculus_reader?tab=readme-ov-file#setup-of-the-adb) for putting the quest into developer mode. Then follow these steps:
 
 1. Clone this repo and download and install the Unity Hub
-2. Open this repo in the Unity Hub, it should already suggest you the correct unity version (6000.0.24f1), also tick the android build support
-3. Open the project and go to Window > Package Manager and update all Meta related packages to version 81.0.0
-4. Ppen the IRIS scene: File > Open Scences > select the IRIS scene under the folder `Scenes`
+2. Open this repo in Unity Hub using Unity 6000.0.68f1. Install Android Build Support, Android SDK & NDK Tools, and OpenJDK for this editor version.
+3. Let Unity restore the packages and verify that all Meta packages resolve to version 81.0.0.
+4. Open the IRIS scene: File > Open Scenes > select `Assets/Scenes/IRISScene.unity`.
 5. Switch the build platform to android: File > Build Profiles > Android > Switch Platform
 6. Switch the build profile to IRIS: File > Build Profiles > Build Profiles > iris meta quest 3 > override global scene list
-7. Compile: File > Build Profiles > Build Profiles > iris meta quest 3 > Build then choose a name for your apk and confirm to pop
+7. Compile: File > Build Profiles > Build Profiles > iris meta quest 3 > Build, then choose a name for the APK.
+
+## QR code alignment
+
+QR tracking requires experimental features to be enabled both in the project and on the headset. Enable them after every headset reboot:
+
+```bash
+adb shell setprop debug.oculus.experimentalEnabled 1
+```
+
+The alignment marker payload is `IRIS`. Generate it without a trailing newline:
+
+```bash
+qrencode -o IRIS.png 'IRIS'
+```
 
 ## Resources
 *   [IRIS-Viz Meta Quest 3 Documentation](https://intuitive-robots.github.io/iris-project-page/xr_development/iris_viz.html)
 *   [Main Python Client Repository](https://github.com/intuitive-robots/SimPublisher)
-

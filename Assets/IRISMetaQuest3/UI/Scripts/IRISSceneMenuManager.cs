@@ -26,7 +26,7 @@ namespace Oculus.Interaction.Samples
     /// The ISDK Scene Manager handles the enabling and disabling
     /// of the ISDK Menu panel and plays audio for each action.
     /// </summary>
-    public class ISDKSceneMenuManager : MonoBehaviour
+    public class IRISSceneMenuManager : MonoBehaviour
     {
         public bool blockMenuToggle = false;
 
@@ -130,12 +130,12 @@ namespace Oculus.Interaction.Samples
 
         public void InjectHideAudio(AudioSource hide)
         {
-            _showMenuAudio = hide;
+            _hideMenuAudio = hide;
         }
 
         public void InjectSpawnPoint(GameObject spawnpoint)
         {
-            _menuParent = spawnpoint;
+            _spawnPoint = spawnpoint;
         }
         #endregion
     }
